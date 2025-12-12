@@ -9,9 +9,9 @@ Endpoints:
 """
 
 import logging
+import os
 import sys
 from datetime import datetime
-import os
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -23,19 +23,19 @@ from fastapi.middleware.cors import CORSMiddleware
 def setup_logging() -> logging.Logger:
     """Configure structured logging for the application."""
     log_level = logging.DEBUG if os.getenv("DEBUG", "false").lower() == "true" else logging.INFO
-    
+
     # Create logger
     logger = logging.getLogger("ai_sdlc_copilot")
     logger.setLevel(log_level)
-    
+
     # Avoid duplicate handlers
     if logger.handlers:
         return logger
-    
+
     # Console handler with formatting
     handler = logging.StreamHandler(sys.stdout)
     handler.setLevel(log_level)
-    
+
     # Format: timestamp - level - message
     formatter = logging.Formatter(
         fmt="%(asctime)s | %(levelname)-8s | %(name)s | %(message)s",
@@ -43,7 +43,7 @@ def setup_logging() -> logging.Logger:
     )
     handler.setFormatter(formatter)
     logger.addHandler(handler)
-    
+
     return logger
 
 
