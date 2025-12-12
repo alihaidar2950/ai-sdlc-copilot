@@ -11,7 +11,9 @@ Endpoints:
 import logging
 import os
 import sys
-from datetime import datetime
+from collections.abc import AsyncGenerator
+from contextlib import asynccontextmanager
+from datetime import UTC, datetime
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -19,6 +21,7 @@ from fastapi.middleware.cors import CORSMiddleware
 # =============================================================================
 # Logging Configuration
 # =============================================================================
+
 
 def setup_logging() -> logging.Logger:
     """Configure structured logging for the application."""
@@ -59,6 +62,35 @@ APP_VERSION = "0.1.0"
 ENVIRONMENT = os.getenv("ENVIRONMENT", "development")
 DEBUG = os.getenv("DEBUG", "false").lower() == "true"
 
+
+# =============================================================================
+# Lifespan Context Manager (replaces on_event decorators)
+# =============================================================================
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
+    """
+    Lifespan context manager for startup and shutdown events.
+    Modern replacement for deprecated @app.on_event decorators.
+    """
+    # Startup
+    logger.info(f"🚀 {APP_NAME} v{APP_VERSION} starting...")
+    logger.info(f"Environment: {ENVIRONMENT}")
+    logger.info(f"Debug mode: {DEBUG}")
+    logger.debug("Debug logging is enabled")
+    # TODO: Initialize Supabase connection
+    # TODO: Initialize Redis connection
+    # TODO: Load prompt templates
+
+    yield  # App runs here
+
+    # Shutdown
+    logger.info(f"👋 {APP_NAME} shutting down...")
+    # TODO: Close database connections
+    # TODO: Close Redis connection
+
+
 # Create FastAPI app
 app = FastAPI(
     title=APP_NAME,
@@ -66,6 +98,7 @@ app = FastAPI(
     version=APP_VERSION,
     docs_url="/docs" if DEBUG else None,  # Disable docs in production
     redoc_url="/redoc" if DEBUG else None,
+    lifespan=lifespan,
 )
 
 # CORS middleware - allow frontend to call API
@@ -84,6 +117,7 @@ app.add_middleware(
 # =============================================================================
 # Health & Status Endpoints
 # =============================================================================
+
 
 @app.get("/health")
 async def health_check():
@@ -105,13 +139,14 @@ async def api_status():
         "version": APP_VERSION,
         "environment": ENVIRONMENT,
         "debug": DEBUG,
-        "timestamp": datetime.utcnow().isoformat(),
+        "timestamp": datetime.now(UTC).isoformat(),
     }
 
 
 # =============================================================================
 # Root Endpoint
 # =============================================================================
+
 
 @app.get("/")
 async def root():
@@ -125,33 +160,3 @@ async def root():
         "health": "/health",
         "api": "/api/v1/status",
     }
-
-
-# =============================================================================
-# Startup & Shutdown Events
-# =============================================================================
-
-@app.on_event("startup")
-async def startup_event():
-    """
-    Run on application startup.
-    Initialize connections to external services.
-    """
-    logger.info(f"🚀 {APP_NAME} v{APP_VERSION} starting...")
-    logger.info(f"Environment: {ENVIRONMENT}")
-    logger.info(f"Debug mode: {DEBUG}")
-    logger.debug("Debug logging is enabled")
-    # TODO: Initialize Supabase connection
-    # TODO: Initialize Redis connection
-    # TODO: Load prompt templates
-
-
-@app.on_event("shutdown")
-async def shutdown_event():
-    """
-    Run on application shutdown.
-    Clean up connections.
-    """
-    logger.info(f"👋 {APP_NAME} shutting down...")
-    # TODO: Close database connections
-    # TODO: Close Redis connection
