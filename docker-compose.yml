@@ -1,0 +1,72 @@
+# AI SDLC Co-Pilot - Docker Compose (MVP-Free Version)
+# =====================================================
+# Cost: $0/month - Uses free tiers for all external services
+# 
+# External Services (FREE):
+#   - Supabase Postgres: 500MB free (https://supabase.com)
+#   - Upstash Redis: 10K commands/day free (https://upstash.com)
+#   - Google Gemini: 15 RPM free (https://aistudio.google.com)
+#   - Groq: 30 RPM free (https://console.groq.com)
+#
+# Usage:
+#   docker-compose up --build              # Start backend + frontend
+#   docker-compose --profile tools up      # Include dev tools (optional)
+#
+# Note: No local database/Redis containers needed - we use cloud free tiers!
+
+version: "3.8"
+
+services:
+  # ============================================
+  # FastAPI Backend
+  # ============================================
+  # Connects to: Supabase (DB), Upstash (Redis), Gemini/Groq (LLM)
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    environment:
+      # App Config
+      - ENVIRONMENT=development
+      - DEBUG=true
+      # Database - Supabase Free Tier (500MB)
+      - SUPABASE_URL=${SUPABASE_URL}
+      - SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY}
+      # LLM APIs - Both Free Tiers
+      - GEMINI_API_KEY=${GEMINI_API_KEY}
+      - GROQ_API_KEY=${GROQ_API_KEY}
+      # Auth - GitHub OAuth (Free)
+      - GITHUB_CLIENT_ID=${GITHUB_CLIENT_ID}
+      - GITHUB_CLIENT_SECRET=${GITHUB_CLIENT_SECRET}
+      # Cache - Upstash Redis Free Tier (10K commands/day)
+      - UPSTASH_REDIS_URL=${UPSTASH_REDIS_URL}
+    volumes:
+      - ./backend:/app
+      - ./prompts:/app/prompts:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ============================================
+  # React Frontend (Development Mode)
+  # ============================================
+  # Vite dev server with hot module replacement
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=http://localhost:8000
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    depends_on:
+      - backend
+    restart: unless-stopped
