@@ -160,3 +160,33 @@ async def root():
         "health": "/health",
         "api": "/api/v1/status",
     }
+
+
+# =============================================================================
+# LLM Test Endpoint
+# =============================================================================
+
+
+@app.post("/api/v1/llm/test")
+async def test_llm(prompt: str = "Say hello in one sentence."):
+    """
+    Test LLM integration.
+    Sends a simple prompt and returns the response.
+    """
+    from app.services.llm_service import get_llm_service
+
+    try:
+        llm = get_llm_service()
+        response = await llm.generate(prompt)
+        return {
+            "success": True,
+            "prompt": prompt,
+            "response": response,
+        }
+    except Exception as e:
+        logger.error(f"LLM test failed: {e}")
+        return {
+            "success": False,
+            "prompt": prompt,
+            "error": str(e),
+        }
