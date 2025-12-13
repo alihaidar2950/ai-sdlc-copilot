@@ -234,7 +234,7 @@ temp/
 *.pkl
 *.pickle
 *.model
-models/
+/models/
 checkpoints/
 
 # Large files
