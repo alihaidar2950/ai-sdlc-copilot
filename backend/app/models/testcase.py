@@ -5,7 +5,7 @@ Pydantic models for test case generation request/response.
 """
 
 from enum import Enum
-from typing import Optional
+from typing import Literal
 
 from pydantic import BaseModel, Field
 
@@ -48,11 +48,10 @@ class TestCaseGenerateRequest(BaseModel):
         ...,
         description="The requirement or user story to generate test cases for",
         min_length=10,
-        examples=["User should be able to login with email and password"],
     )
-    context: Optional[str] = Field(
-        None,
-        description="Additional context about the system or feature",
+    context: str = Field(
+        default="",
+        description="Additional context about the system, tech stack, or constraints",
     )
     num_cases: int = Field(
         default=5,
@@ -64,6 +63,29 @@ class TestCaseGenerateRequest(BaseModel):
         default=True,
         description="Include edge case and negative test scenarios",
     )
+    output_format: Literal["json", "markdown"] = Field(
+        default="json",
+        description="Output format: json (structured) or markdown (human-readable)",
+    )
+    system_prompt: str | None = Field(
+        default=None,
+        description="Override the default QA engineer system prompt (for advanced users)",
+    )
+
+    model_config = {
+        "json_schema_extra": {
+            "examples": [
+                {
+                    "requirement": "User should be able to login with email and password",
+                    "context": "",
+                    "num_cases": 5,
+                    "include_edge_cases": True,
+                    "output_format": "json",
+                    "system_prompt": "You are an expert QA engineer with 10+ years of experience in test case design. Your task is to generate comprehensive, production-ready test cases from software requirements.",
+                }
+            ]
+        }
+    }
 
 
 class TestCaseGenerateResponse(BaseModel):
