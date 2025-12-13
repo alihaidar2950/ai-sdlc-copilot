@@ -24,6 +24,7 @@ class LLMService:
 
         if self.groq_key:
             from groq import Groq
+
             self._groq_client = Groq(api_key=self.groq_key)
             logger.info("✅ Groq configured (primary)")
         else:
@@ -55,7 +56,9 @@ class LLMService:
                 logger.error(f"Groq error: {e}")
                 if self._gemini_model:
                     logger.info("Falling back to Gemini...")
-                    return await self._generate_gemini(prompt, system_prompt, max_tokens, temperature)
+                    return await self._generate_gemini(
+                        prompt, system_prompt, max_tokens, temperature
+                    )
                 else:
                     raise
 
