@@ -20,7 +20,7 @@ from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.routers import testcases
+from app.routers import pytest_router, testcases
 
 # Load .env from project root (one level up from backend/)
 env_path = Path(__file__).resolve().parent.parent.parent / ".env"
@@ -123,6 +123,7 @@ app.add_middleware(
 
 # Include routers
 app.include_router(testcases.router)
+app.include_router(pytest_router.router)
 
 
 # =============================================================================
