@@ -33,7 +33,7 @@ class MarkdownResponse(BaseModel):
 
 logger = logging.getLogger("ai_sdlc_copilot")
 
-router = APIRouter(prefix="/api/v1/testcases", tags=["Test Cases"])
+router = APIRouter(prefix="/testcases", tags=["Test Cases"])
 
 
 @router.post("/generate", response_model=TestCaseGenerateResponse | MarkdownResponse)

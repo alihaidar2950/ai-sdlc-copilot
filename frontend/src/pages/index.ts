@@ -1,0 +1,6 @@
+export { DashboardPage } from "./DashboardPage"
+export { TestCasesPage } from "./TestCasesPage"
+export { PyTestPage } from "./PyTestPage"
+export { AnalyzePage } from "./AnalyzePage"
+export { GitHubPage } from "./GitHubPage"
+export { SettingsPage } from "./SettingsPage"

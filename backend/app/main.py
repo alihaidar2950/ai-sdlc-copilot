@@ -114,16 +114,21 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:5173",  # Vite dev server
+        "http://localhost:5174",  # Vite dev server (alternate port)
         "http://localhost:3000",  # Alternative frontend port
+        "http://127.0.0.1:5173",
+        "http://127.0.0.1:5174",
+        "http://127.0.0.1:3000",
     ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Include routers
-app.include_router(testcases.router)
-app.include_router(pytest_router.router)
+# Include routers with /api/v1 prefix
+API_V1_PREFIX = "/api/v1"
+app.include_router(testcases.router, prefix=API_V1_PREFIX)
+app.include_router(pytest_router.router, prefix=API_V1_PREFIX)
 
 
 # =============================================================================

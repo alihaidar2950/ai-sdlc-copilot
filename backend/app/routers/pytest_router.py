@@ -22,7 +22,7 @@ from app.prompts.pytest_prompt import (
 )
 from app.services.llm_service import get_llm_service
 
-router = APIRouter(prefix="/pytest", tags=["pytest"])
+router = APIRouter(prefix="/pytest", tags=["PyTest"])
 logger = logging.getLogger("ai_sdlc_copilot")
 
 
